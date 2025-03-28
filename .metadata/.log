@@ -1,0 +1,34 @@
+!SESSION 2025-03-26 20:07:32.672 -----------------------------------------------
+eclipse.buildId=4.34.0.20241128-0756
+java.version=23.0.2
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=aarch64, WS=cocoa, NL=zh_TW_#Hant
+Framework arguments:  -product org.eclipse.epp.package.java.product -keyring /Users/balestore/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch aarch64 -product org.eclipse.epp.package.java.product -keyring /Users/balestore/.eclipse_keyring
+
+!ENTRY ch.qos.logback.classic 1 0 2025-03-26 20:07:33.494
+!MESSAGE Activated before the state location was initialized. Retry after the state location is initialized.
+
+!ENTRY ch.qos.logback.classic 1 0 2025-03-26 20:07:46.113
+!MESSAGE Logback config file: /Users/balestore/eclipse-workspace/T2/.metadata/.plugins/org.eclipse.m2e.logback/logback.2.7.0.20241001-1350.xml
+!SESSION 2025-03-26 20:20:27.283 -----------------------------------------------
+eclipse.buildId=4.34.0.20241128-0756
+java.version=23.0.2
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=aarch64, WS=cocoa, NL=zh_TW_#Hant
+Framework arguments:  -product org.eclipse.epp.package.java.product -keyring /Users/balestore/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch aarch64 -product org.eclipse.epp.package.java.product -keyring /Users/balestore/.eclipse_keyring
+
+!ENTRY ch.qos.logback.classic 1 0 2025-03-26 20:20:28.112
+!MESSAGE Activated before the state location was initialized. Retry after the state location is initialized.
+
+!ENTRY ch.qos.logback.classic 1 0 2025-03-26 20:20:34.779
+!MESSAGE Logback config file: /Users/balestore/eclipse-workspace/T2/.metadata/.plugins/org.eclipse.m2e.logback/logback.2.7.0.20241001-1350.xml
+
+!ENTRY org.eclipse.ui.ide 4 4 2025-03-26 20:22:13.313
+!MESSAGE Problems saving workspace
+
+!ENTRY org.eclipse.ui.ide 2 1 2025-03-26 20:22:13.318
+!MESSAGE Problems occurred while trying to save the state of the workbench.
+!SUBENTRY 1 org.eclipse.core.resources 2 234 2025-03-26 20:22:13.318
+!MESSAGE The project description file (.project) for 'T2' was missing.  This file contains important information about the project.  A new project description file has been created, but some information about the project may have been lost.
