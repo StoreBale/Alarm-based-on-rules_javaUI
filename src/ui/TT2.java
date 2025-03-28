@@ -1,5 +1,5 @@
 package ui;
 
-public class T2 {
+public class TT2 {
 
 }
