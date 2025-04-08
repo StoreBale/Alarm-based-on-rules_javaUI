@@ -58,7 +58,7 @@ public class TT2 {
 		loadDrugHistory();
 
 		// 病患資料顯示
-		JTextArea patientInfo = new JTextArea("病患資訊：年齡45歲，男性，有高血壓病史，目前服用降壓藥，最近感覺頭暈和輕微噁心，無其他重大病史。");
+		JTextArea patientInfo = new JTextArea("");
 		patientInfo.setBounds(270, 10, 500, 80);
 		patientInfo.setLineWrap(true);
 		patientInfo.setWrapStyleWord(true);
