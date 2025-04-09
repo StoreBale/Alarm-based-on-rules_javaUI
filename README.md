@@ -36,6 +36,8 @@ CREATE TABLE patient_lab_results (
 );
 
 ```
+<img width="415" alt="image" src="https://github.com/user-attachments/assets/db52bfc8-fcce-4fbd-84e8-ed9288182e6f" />
+<img width="322" alt="image" src="https://github.com/user-attachments/assets/5f17ee25-5e2e-4d74-b7ec-e5e3eb9d63b4" />
 
 ## 🔍 檢查藥量警告邏輯
 
