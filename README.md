@@ -5,8 +5,9 @@
 本系統是一個基於 Java Swing 的桌面應用程式，主要用於管理病患的藥品歷史記錄，並檢查新添加藥品之間的交互作用。
 
 ## ✨✨✨ 功能添加
-- ✅ **要量警訊警告**：當送出藥品時，系統會檢查是否有藥量過多，並給出警告。
+- ✅ **藥量警訊警告**：當送出藥品時，系統會檢查是否有藥量過多，並給出警告。
 
+![image](https://github.com/user-attachments/assets/bc4f3eb7-fc7c-45b2-9978-6451ce7219a2)
 
 ## 🛠 環境需求
 
@@ -42,7 +43,6 @@ CREATE TABLE patient_lab_results (
 private void submitLabResult(int pid, String key, float value, String source) {
 	    try (Connection conn = DBConnection.getConnection()) {
 
-	        // 1. 插入 lab 結果
 	        String insertLabSql = "INSERT INTO patient_lab_results (pid, record_time, key_name, value, source) VALUES (?, NOW(), ?, ?, ?)";
 	        PreparedStatement insertPs = conn.prepareStatement(insertLabSql);
 	        insertPs.setInt(1, pid);
@@ -51,7 +51,6 @@ private void submitLabResult(int pid, String key, float value, String source) {
 	        insertPs.setString(4, source);
 	        insertPs.executeUpdate();
 
-	        // 2. 比對 alarm_rules 表中觸發邏輯
 	        String alarmSql = "SELECT trigger_condition, alarm_message FROM alarm_rules";
 	        PreparedStatement alarmPs = conn.prepareStatement(alarmSql);
 	        ResultSet rs = alarmPs.executeQuery();
@@ -60,7 +59,6 @@ private void submitLabResult(int pid, String key, float value, String source) {
 	            String condition = rs.getString("trigger_condition");
 	            String message = rs.getString("alarm_message");
 
-	            // 基礎範例，只處理單純條件 like Na+ < 120
 	            if (condition.contains(key)) {
 	                if (condition.contains("<")) {
 	                    float threshold = Float.parseFloat(condition.replaceAll("[^0-9.]", ""));
