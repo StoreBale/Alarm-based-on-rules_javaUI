@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 public class DBConnection {
     // MySQL 連線資訊
-    private static final String URL = "jdbc:mysql://localhost:3306/T1?useSSL=false&serverTimezone=UTC";
+    private static final String URL = "jdbc:mysql://localhost:3306/T2?useSSL=false&serverTimezone=UTC";
     private static final String USER = "root";
     private static final String PASSWORD = "password";
 
@@ -31,13 +31,13 @@ public class DBConnection {
 
     // 測試查詢
     public static void queryData() {
-        String sql = "SELECT * FROM drug"; // 指定 T1 資料庫中的 drug 表
+        String sql = "SELECT * FROM alarm_rules"; 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                System.out.println("ID: " + rs.getInt("drug_id") + ", Name: " + rs.getString("drug_name"));
+                System.out.println("ID: " + rs.getInt("id") + ", Name: " + rs.getString("trigger_condition"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
