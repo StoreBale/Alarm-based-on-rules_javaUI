@@ -105,11 +105,8 @@ public class TT2 {
 		submitButton.setBounds(670, 510, 100, 40);
 		frame.getContentPane().add(submitButton);
 		submitButton.addActionListener(e -> {
-<<<<<<< HEAD
 		    JOptionPane.showMessageDialog(frame, "警訊觸發!!!：Na+ < 120 mEq/l, Hyponatramia (NAL)", "警訊通知", JOptionPane.WARNING_MESSAGE);
-=======
-		    JOptionPane.showMessageDialog(frame, "⚠️ 警訊觸發：Na+ < 120 mEq/l, Hyponatramia (NAL)", "警訊通知", JOptionPane.WARNING_MESSAGE);
->>>>>>> f4d72502ab26bca9b522a349786921d818e80c70
+
 		});
 		
 	}
