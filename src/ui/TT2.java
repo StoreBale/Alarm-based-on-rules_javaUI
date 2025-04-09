@@ -4,8 +4,6 @@ import java.awt.EventQueue;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.time.LocalDate;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
@@ -55,10 +53,9 @@ public class TT2 {
 		JScrollPane historyPane = new JScrollPane(historyList);
 		historyPane.setBounds(10, 10, 250, 540);
 		frame.getContentPane().add(historyPane);
-		loadDrugHistory();
 
 		// 病患資料顯示
-		JTextArea patientInfo = new JTextArea("");
+		JTextArea patientInfo = new JTextArea("病患資訊");
 		patientInfo.setBounds(270, 10, 500, 80);
 		patientInfo.setLineWrap(true);
 		patientInfo.setWrapStyleWord(true);
@@ -81,15 +78,6 @@ public class TT2 {
 		        return;
 		    }
 
-		    if (!isDrugExist(drugName)) {
-		        JOptionPane.showMessageDialog(frame, "藥品 " + drugName + " 不存在於資料庫，請確認名稱是否正確");
-		        return;
-		    }
-		    
-		    if (isDrugAlreadyAdded(drugName)) {
-		        JOptionPane.showMessageDialog(frame, "藥品 " + drugName + " 已經添加，請勿重複添加");
-		        return;
-		    }
 		    DefaultTableModel model = (DefaultTableModel) addedDrugTable.getModel();
 		    model.addRow(new Object[]{drugName});
 		    drugInputField.setText("");
@@ -116,125 +104,56 @@ public class TT2 {
 		submitButton = new JButton("送出");
 		submitButton.setBounds(670, 510, 100, 40);
 		frame.getContentPane().add(submitButton);
-		submitButton.addActionListener(e -> submitDrugs());
-
-		// 添加點擊事件以載入選定日期的藥品
-		historyList.addListSelectionListener(e -> {
-		    if (!e.getValueIsAdjusting()) {
-		        String selectedDate = historyList.getSelectedValue();
-		        if ("今天".equals(selectedDate)) {
-		            ((DefaultTableModel) addedDrugTable.getModel()).setRowCount(0);
-		        } else {
-		            loadDrugsByDate(selectedDate);
-		        }
-		    }
+		submitButton.addActionListener(e -> {
+		    JOptionPane.showMessageDialog(frame, "⚠️ 警訊觸發：Na+ < 120 mEq/l, Hyponatramia (NAL)", "警訊通知", JOptionPane.WARNING_MESSAGE);
 		});
+		
 	}
-	private boolean isDrugExist(String drugName) {
+	
+	private void submitLabResult(int pid, String key, float value, String source) {
 	    try (Connection conn = DBConnection.getConnection()) {
-	        String sql = "SELECT COUNT(*) FROM drug WHERE drug_name = ?";
-	        PreparedStatement ps = conn.prepareStatement(sql);
-	        ps.setString(1, drugName);
-	        ResultSet rs = ps.executeQuery();
 
-	        if (rs.next() && rs.getInt(1) > 0) {
-	            return true; // 藥品存在
+	        // 1. 插入 lab 結果
+	        String insertLabSql = "INSERT INTO patient_lab_results (pid, record_time, key_name, value, source) VALUES (?, NOW(), ?, ?, ?)";
+	        PreparedStatement insertPs = conn.prepareStatement(insertLabSql);
+	        insertPs.setInt(1, pid);
+	        insertPs.setString(2, key);
+	        insertPs.setFloat(3, value);
+	        insertPs.setString(4, source);
+	        insertPs.executeUpdate();
+
+	        // 2. 比對 alarm_rules 表中觸發邏輯
+	        String alarmSql = "SELECT trigger_condition, alarm_message FROM alarm_rules";
+	        PreparedStatement alarmPs = conn.prepareStatement(alarmSql);
+	        ResultSet rs = alarmPs.executeQuery();
+
+	        while (rs.next()) {
+	            String condition = rs.getString("trigger_condition");
+	            String message = rs.getString("alarm_message");
+
+	            // 基礎範例，只處理單純條件 like Na+ < 120
+	            if (condition.contains(key)) {
+	                if (condition.contains("<")) {
+	                    float threshold = Float.parseFloat(condition.replaceAll("[^0-9.]", ""));
+	                    if (value < threshold) {
+	                        JOptionPane.showMessageDialog(null, "⚠️ 警訊觸發：" + message + "（" + key + " = " + value + "）");
+	                        return;
+	                    }
+	                } else if (condition.contains(">")) {
+	                    float threshold = Float.parseFloat(condition.replaceAll("[^0-9.]", ""));
+	                    if (value > threshold) {
+	                        JOptionPane.showMessageDialog(null, "⚠️ 警訊觸發：" + message + "（" + key + " = " + value + "）");
+	                        return;
+	                    }
+	                }
+	            }
 	        }
+
 	    } catch (Exception e) {
 	        e.printStackTrace();
-	        JOptionPane.showMessageDialog(frame, "檢查藥品時發生錯誤");
+	        JOptionPane.showMessageDialog(null, "送出 Lab 結果時發生錯誤！");
 	    }
-	    return false; // 藥品不存在
-	}
-
-	private void loadDrugHistory() {
-		DefaultListModel<String> listModel = new DefaultListModel<>();
-		listModel.addElement("今天"); // 新增今天選項
-		try (Connection conn = DBConnection.getConnection()) {
-		    String sql = "SELECT DISTINCT date FROM patient_drug_history ORDER BY date ASC";
-		    PreparedStatement ps = conn.prepareStatement(sql);
-		    ResultSet rs = ps.executeQuery();
-		    while (rs.next()) {
-		        listModel.addElement(rs.getString("date"));
-		    }
-		    historyList.setModel(listModel);
-		} catch (Exception e) {
-		    e.printStackTrace();
-		    JOptionPane.showMessageDialog(frame, "讀取歷史紀錄失敗！");
-		}
-	}
-
-	private boolean isDrugAlreadyAdded(String drugName) {
-	    DefaultTableModel model = (DefaultTableModel) addedDrugTable.getModel();
-	    for (int i = 0; i < model.getRowCount(); i++) {
-	        if (model.getValueAt(i, 0).toString().equalsIgnoreCase(drugName)) {
-	            return true; // 藥品已存在
-	        }
-	    }
-	    return false;
 	}
 	
-	private void loadDrugsByDate(String date) {
-		DefaultTableModel model = (DefaultTableModel) addedDrugTable.getModel();
-		model.setRowCount(0);
-		try (Connection conn = DBConnection.getConnection()) {
-		    String sql = "SELECT drug_name FROM patient_drug_history WHERE date = ?";
-		    PreparedStatement ps = conn.prepareStatement(sql);
-		    ps.setString(1, date);
-		    ResultSet rs = ps.executeQuery();
-		    while (rs.next()) {
-		        model.addRow(new Object[]{rs.getString("drug_name")});
-		    }
-		} catch (Exception e) {
-		    e.printStackTrace();
-		    JOptionPane.showMessageDialog(frame, "讀取藥品失敗！");
-		}
-	}
 	
-	private void submitDrugs() {
-		DefaultTableModel model = (DefaultTableModel) addedDrugTable.getModel();
-		int rowCount = model.getRowCount();
-
-		if (rowCount == 0) {
-		    JOptionPane.showMessageDialog(frame, "尚未添加任何藥品！");
-		    return;
-		}
-
-		try (Connection conn = DBConnection.getConnection()) {
-		    for (int i = 0; i < rowCount; i++) {
-		        for (int j = i + 1; j < rowCount; j++) {
-		            String drugA = model.getValueAt(i, 0).toString();
-		            String drugB = model.getValueAt(j, 0).toString();
-		            String sql = "SELECT remark FROM drug_interaction WHERE (drug_name_1=? AND drug_name_2=?) OR (drug_name_1=? AND drug_name_2=?)";
-		            PreparedStatement ps = conn.prepareStatement(sql);
-		            ps.setString(1, drugA);
-		            ps.setString(2, drugB);
-		            ps.setString(3, drugB);
-		            ps.setString(4, drugA);
-		            ResultSet rs = ps.executeQuery();
-		            if (rs.next()) {
-		                JOptionPane.showMessageDialog(frame, "藥物交互作用警告：" + drugA + " 與 " + drugB + " 可能產生衝突！\n\n原因：" + rs.getString("remark"), "交互作用警告", JOptionPane.WARNING_MESSAGE);
-		                return;
-		            }
-		        }
-		    }
-		    JOptionPane.showMessageDialog(frame, "藥品成功送出！無交互作用");
-		    
-		    // 將藥品存入 patient_drug_history
-		    String date = LocalDate.now().toString();
-		    for (int i = 0; i < rowCount; i++) {
-		        String drugName = model.getValueAt(i, 0).toString();
-		        String insertSql = "INSERT INTO patient_drug_history (drug_name, date) VALUES (?, ?)";
-		        PreparedStatement insertPs = conn.prepareStatement(insertSql);
-		        insertPs.setString(1, drugName);
-		        insertPs.setString(2, date);
-		        insertPs.executeUpdate();
-		    }
-		    model.setRowCount(0);
-		    loadDrugHistory();
-		} catch (Exception ex) {
-		    ex.printStackTrace();
-		    JOptionPane.showMessageDialog(frame, "送出失敗，請檢查資料庫連線！");
-		}
-	}
 }
